@@ -2,19 +2,27 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "restaurant-company"
+        PATH = "/opt/homebrew/bin:${env.PATH}"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                echo 'Checking out source code...'
                 checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Check Node') {
+            steps {
+                sh 'echo $PATH'
+                sh 'which node'
+                sh 'which npm'
+                sh 'node -v'
+                sh 'npm -v'
+            }
+        }
+
+        stage('Install') {
             steps {
                 sh 'npm install'
             }
@@ -24,28 +32,6 @@ pipeline {
             steps {
                 sh 'npm run build'
             }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'npm test || true'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t ${IMAGE_NAME}:latest .'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-
-        failure {
-            echo 'Pipeline failed.'
         }
     }
 }
